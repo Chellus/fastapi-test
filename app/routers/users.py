@@ -1,7 +1,9 @@
+from typing import Annotated
 from fastapi import APIRouter, HTTPException, Depends, status
-from ..models import users
-from ..db.database import get_session
-from ..services import users_service
+from app.models import users
+from app.db.database import get_session
+from app.services import users_service, auth_service
+from app.utils.security import get_password_hash
 from sqlmodel import Session
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -16,5 +18,10 @@ async def register_user(user_data: users.UserCreate, session: Session = Depends(
             detail="That username already exists!"
         )
     
-    user = users_service.create_user(user_data.name, user_data.username, user_data.email, user_data.password, session)
+    hashed_password = get_password_hash(user_data.password)
+    user = users_service.create_user(user_data.name, user_data.username, user_data.email, hashed_password, session)
     return user
+
+@router.post("/test")
+async def test_auth(token: Annotated[str, Depends(auth_service.get_current_user)]):
+    return {"message": "ola"}

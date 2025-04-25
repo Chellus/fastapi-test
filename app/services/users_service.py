@@ -2,6 +2,15 @@ from ..models_db.user import Users
 from sqlmodel import Session, select
 
 def get_user_by_username(username: str, session: Session) -> Users:
+    """
+    Get user by username.
+    
+    ### Parameters:
+        - username (str): username to search user.
+        - session (Session): database session.
+
+    
+    """
     statement = select(Users).where(Users.username == username)
     results = session.exec(statement)
     return results.first()
